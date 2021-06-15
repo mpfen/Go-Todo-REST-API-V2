@@ -20,6 +20,7 @@ func NewTodoServer(store store.TodoStore) *TodoServer {
 	// Project routes
 	t.Router.GET("/projects/:name", t.GetProject)
 	t.Router.POST("/projects/", t.PostProject)
+	t.Router.GET("/projects/", t.GetAllProjects)
 
 	return t
 }
@@ -31,4 +32,8 @@ func (t *TodoServer) GetProject(c *gin.Context) {
 
 func (t *TodoServer) PostProject(c *gin.Context) {
 	handler.PostProjectHandler(t.Store, c)
+}
+
+func (t *TodoServer) GetAllProjects(c *gin.Context) {
+	handler.GetAllProjectsHandler(t.Store, c)
 }

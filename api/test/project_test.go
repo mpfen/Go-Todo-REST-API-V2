@@ -90,6 +90,7 @@ func TestGetProject(t *testing.T) {
 	})
 }
 
+// Test for Route POST /Projects/
 func TestPostProject(t *testing.T) {
 	server, store := setupProjectTests()
 
@@ -125,6 +126,21 @@ func TestPostProject(t *testing.T) {
 		assert.Len(t, store.Projects, 4)
 	})
 
+}
+
+// Test for Route GET /projects/
+func TestGetAllProjects(t *testing.T) {
+	server, store := setupProjectTests()
+
+	req, _ := http.NewRequest("GET", "/projects/", nil)
+	w := httptest.NewRecorder()
+	server.Router.ServeHTTP(w, req)
+
+	assert.Equalf(t, http.StatusOK, w.Code, "wanted http.StatusOK got %s", w.Code)
+
+	gotJSON := w.Body.String()
+	want := projectsToJson(t, store.Projects)
+	assert.JSONEqf(t, want, gotJSON, "wanted %s got %s", want, gotJSON)
 }
 
 // makes a new json request body for POST /projects/

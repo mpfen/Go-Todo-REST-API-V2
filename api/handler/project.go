@@ -58,3 +58,9 @@ func PostProjectHandler(t store.TodoStore, c *gin.Context) {
 		"message": "project created",
 	})
 }
+
+// Handler for GET /projects/
+func GetAllProjectsHandler(t store.TodoStore, c *gin.Context) {
+	projects := t.GetAllProjects()
+	c.JSON(http.StatusOK, projects)
+}

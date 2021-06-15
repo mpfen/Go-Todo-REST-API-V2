@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"encoding/json"
+	"io"
 	"testing"
 	"time"
 
@@ -42,6 +43,10 @@ func (s *StubTodoStore) PostProject(name string) error {
 	return nil
 }
 
+func (s *StubTodoStore) GetAllProjects() []model.Project {
+	return s.Projects
+}
+
 // Converts a project struct to json
 func projectToJson(t *testing.T, project model.Project) string {
 	t.Helper()
@@ -50,4 +55,27 @@ func projectToJson(t *testing.T, project model.Project) string {
 		t.Errorf("Error parsing project to json: %s", err)
 	}
 	return string(want[:])
+}
+
+// Converts an array of projects to json
+func projectsToJson(t *testing.T, projects []model.Project) string {
+	t.Helper()
+	want, err := json.Marshal(projects)
+	if err != nil {
+		t.Errorf("Error parsing project to json: %s", err)
+	}
+	return string(want[:])
+}
+
+// Decodes the response body to an array of project struct
+func decodeAllProjectsFromResponse(t testing.TB, rdr io.Reader) []model.Project {
+	t.Helper()
+
+	var projects []model.Project
+	err := json.NewDecoder(rdr).Decode(&projects)
+	if err != nil {
+		t.Errorf("problem parsing project, %v", err)
+	}
+
+	return projects
 }
