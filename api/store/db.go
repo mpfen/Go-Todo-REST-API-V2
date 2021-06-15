@@ -14,16 +14,16 @@ import (
 // StubTodoStore instead of a real database
 type TodoStore interface {
 	GetProject(name string) model.Project
-	PostProject(name string) error
-	GetAllProjects() []model.Project
-	DeleteProject(name string) error
-	UpdateProject(project model.Project) error
+	//PostProject(name string) error
+	//GetAllProjects() []model.Project
+	//DeleteProject(name string) error
+	//UpdateProject(project model.Project) error
 
-	GetTask(projectName, taskName string) model.Task
-	PostTask(task model.Task) error
-	GetAllProjectTasks(project model.Project) []model.Task
-	DeleteTask(task model.Task) error
-	UpdateTask(task model.Task) error
+	//GetTask(projectName, taskName string) model.Task
+	//PostTask(task model.Task) error
+	//GetAllProjectTasks(project model.Project) []model.Task
+	//DeleteTask(task model.Task) error
+	//UpdateTask(task model.Task) error
 }
 
 type Database struct {
