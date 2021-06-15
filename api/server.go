@@ -19,6 +19,7 @@ func NewTodoServer(store store.TodoStore) *TodoServer {
 
 	// Project routes
 	t.Router.GET("/projects/:name", t.GetProject)
+	t.Router.POST("/projects/", t.PostProject)
 
 	return t
 }
@@ -26,4 +27,8 @@ func NewTodoServer(store store.TodoStore) *TodoServer {
 // Project Handlers
 func (t *TodoServer) GetProject(c *gin.Context) {
 	handler.GetProjectHandler(t.Store, c)
+}
+
+func (t *TodoServer) PostProject(c *gin.Context) {
+	handler.PostProjectHandler(t.Store, c)
 }

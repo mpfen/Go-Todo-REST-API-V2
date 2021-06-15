@@ -1,6 +1,8 @@
 package api_test
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -84,6 +86,67 @@ func TestGetProject(t *testing.T) {
 		w := httptest.NewRecorder()
 		server.Router.ServeHTTP(w, req)
 
-		assert.Equalf(t, http.StatusNotFound, w.Code, "wanted %s got %s", http.StatusNotFound, w.Code)
+		assert.Equalf(t, http.StatusNotFound, w.Code, "wanted http.StatusNotFound got %s", w.Code)
 	})
+}
+
+func TestPostProject(t *testing.T) {
+	server, store := setupProjectTests()
+
+	t.Run("Create project exams", func(t *testing.T) {
+		requestBody := makeNewPostProjectBody(t, "exams", true)
+		req, _ := http.NewRequest("POST", "/projects/", requestBody)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		if assert.Equalf(t, http.StatusCreated, w.Code, "wanted http.StatusCreated got %s", w.Code) {
+			assert.Equalf(t, "exams", store.Projects[3].Name, "project was not created")
+		}
+
+	})
+
+	t.Run("Try to create project with invalid request body", func(t *testing.T) {
+		requestBody := makeNewPostProjectBody(t, "exams", false)
+		req, _ := http.NewRequest("POST", "/projects/", requestBody)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equalf(t, http.StatusBadRequest, w.Code, "wanted http.StatusBadRequest got: %s", w.Code)
+		assert.Len(t, store.Projects, 4)
+	})
+
+	t.Run("Try to create an exiting project", func(t *testing.T) {
+		requestBody := makeNewPostProjectBody(t, "homework", true)
+		req, _ := http.NewRequest("POST", "/projects/", requestBody)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equalf(t, http.StatusBadRequest, w.Code, "wanted http.StatusBadRequest got: %s", w.Code)
+		assert.Len(t, store.Projects, 4)
+	})
+
+}
+
+// makes a new json request body for POST /projects/
+// if valid == false a invalid requestBody is returned
+func makeNewPostProjectBody(t *testing.T, name string, vaild bool) *bytes.Buffer {
+	if vaild {
+		requestBody, err := json.Marshal(map[string]string{
+			"name": name,
+		})
+		if err != nil {
+			t.Errorf("Failed to make requestBody: %s", err)
+		}
+
+		return bytes.NewBuffer(requestBody)
+	} else {
+		requestBody, err := json.Marshal(map[string]string{
+			"invaild": name,
+		})
+		if err != nil {
+			t.Errorf("Failed to make requestBody: %s", err)
+		}
+
+		return bytes.NewBuffer(requestBody)
+	}
 }

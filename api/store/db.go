@@ -14,7 +14,7 @@ import (
 // StubTodoStore instead of a real database
 type TodoStore interface {
 	GetProject(name string) model.Project
-	//PostProject(name string) error
+	PostProject(name string) error
 	//GetAllProjects() []model.Project
 	//DeleteProject(name string) error
 	//UpdateProject(project model.Project) error
