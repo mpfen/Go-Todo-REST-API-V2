@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mpfen/Go-Todo-REST-API-V2/api/store"
+	"gorm.io/gorm"
 )
 
 // Handler for GET /projects/:name
@@ -95,5 +96,25 @@ func PutProjectHandler(t store.TodoStore, c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": "project updated",
+	})
+}
+
+// Handler for DELETE /projects/:name
+func DeleteProjectHandler(t store.TodoStore, c *gin.Context) {
+	projectName := c.Param("name")
+	err := t.DeleteProject(projectName)
+
+	// Check error if no project was found
+	if err == gorm.ErrRecordNotFound {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "project not found",
+		})
+	} else if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err,
+		})
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "project deleted",
 	})
 }

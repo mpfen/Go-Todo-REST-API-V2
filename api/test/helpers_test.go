@@ -52,6 +52,16 @@ func (s *StubTodoStore) UpdateProject(project model.Project) error {
 	return nil
 }
 
+func (s *StubTodoStore) DeleteProject(projectName string) error {
+	for i, project := range s.Projects {
+		if project.Name == projectName {
+			s.Projects = append(s.Projects[:i], s.Projects[(i+1):]...)
+			return nil
+		}
+	}
+	return gorm.ErrRecordNotFound
+}
+
 // Converts a project struct to json
 func projectToJson(t *testing.T, project model.Project) string {
 	t.Helper()

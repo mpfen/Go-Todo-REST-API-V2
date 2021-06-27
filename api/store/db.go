@@ -16,7 +16,7 @@ type TodoStore interface {
 	GetProject(name string) model.Project
 	PostProject(name string) error
 	GetAllProjects() []model.Project
-	//DeleteProject(name string) error
+	DeleteProject(name string) error
 	UpdateProject(project model.Project) error
 
 	//GetTask(projectName, taskName string) model.Task

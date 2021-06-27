@@ -147,14 +147,18 @@ func TestGetAllProjects(t *testing.T) {
 func TestUpdateProject(t *testing.T) {
 	server, store := setupProjectTests()
 
-	t.Run("rename project homework to mathhomework", func(t *testing.T) {
+	t.Run("Rename project homework to mathhomework", func(t *testing.T) {
+		// create mathhomework struct for comparison
+		mathhomework := store.Projects[0]
+		mathhomework.Name = "mathhomework"
+
 		requestBody := makeNewPostProjectBody(t, "mathhomework", true)
 		req, _ := http.NewRequest("PUT", "/projects/homework", requestBody)
 		w := httptest.NewRecorder()
 		server.Router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code, "wanted http.StatusOK got %s", w.Code)
-		assert.Equalf(t, "mathhomework", store.Projects[0].Name, "project was not updated")
+		assert.Containsf(t, store.Projects, mathhomework, "project was not updated")
 		assert.Len(t, store.Projects, 3)
 	})
 
@@ -165,6 +169,33 @@ func TestUpdateProject(t *testing.T) {
 		server.Router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusNotFound, w.Code, "wanted http.StatusNotFound got %s", w.Code)
+	})
+}
+
+// Tests for Route DELETE /project/:name
+func TestDeleteProject(t *testing.T) {
+	server, store := setupProjectTests()
+
+	t.Run("Delete project homework", func(t *testing.T) {
+		// Copy of project homework for asserts
+		homework := store.Projects[0]
+
+		req, _ := http.NewRequest("DELETE", "/projects/homework", nil)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code, "wanted http.StatusOK got %s", w.Code)
+		assert.Len(t, store.Projects, 2)
+		assert.NotContainsf(t, store.Projects, homework, "project was not deleted")
+	})
+
+	t.Run("Try to delete nonexisting project", func(t *testing.T) {
+		req, _ := http.NewRequest("DELETE", "/projects/homework", nil)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusNotFound, w.Code, "wanted http.StatusNotFound got %s", w.Code)
+		assert.Len(t, store.Projects, 2)
 	})
 }
 
