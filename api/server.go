@@ -23,6 +23,8 @@ func NewTodoServer(store store.TodoStore) *TodoServer {
 	t.Router.GET("/projects/", t.GetAllProjects)
 	t.Router.PUT("/projects/:name", t.PutProject)
 	t.Router.DELETE("/projects/:name", t.DeleteProject)
+	t.Router.DELETE("/projects/:name/archive", t.ArchiveProject)
+	t.Router.PUT("/projects/:name/archive", t.ArchiveProject)
 
 	return t
 }
@@ -46,4 +48,8 @@ func (t *TodoServer) PutProject(c *gin.Context) {
 
 func (t *TodoServer) DeleteProject(c *gin.Context) {
 	handler.DeleteProjectHandler(t.Store, c)
+}
+
+func (t *TodoServer) ArchiveProject(c *gin.Context) {
+	handler.ArchiveProjectHandler(t.Store, c)
 }

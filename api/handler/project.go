@@ -118,3 +118,39 @@ func DeleteProjectHandler(t store.TodoStore, c *gin.Context) {
 		"message": "project deleted",
 	})
 }
+
+// Handler for PUT/DELETE /projects/:name/archive
+func ArchiveProjectHandler(t store.TodoStore, c *gin.Context) {
+	projectName := c.Param("name")
+
+	// Check if project exists
+	project := t.GetProject(projectName)
+	if project.Name == "" {
+		c.JSON(http.StatusNotFound, gin.H{"message": "project not found"})
+		return
+	}
+
+	// Depending on method archive or unarchive project
+	var responseText string
+	if c.Request.Method == "PUT" {
+		project.ArchiveProject()
+		responseText = "project archived"
+
+	} else {
+		project.UnArchiveProject()
+		responseText = "project unarchived"
+	}
+
+	// Update project
+	err := t.UpdateProject(project)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err,
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": responseText,
+	})
+}

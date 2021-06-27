@@ -143,7 +143,7 @@ func TestGetAllProjects(t *testing.T) {
 	assert.JSONEqf(t, want, gotJSON, "wanted %s got %s", want, gotJSON)
 }
 
-// Tests for Route PUT /project/:name
+// Tests for Route PUT /projects/:name
 func TestUpdateProject(t *testing.T) {
 	server, store := setupProjectTests()
 
@@ -172,7 +172,7 @@ func TestUpdateProject(t *testing.T) {
 	})
 }
 
-// Tests for Route DELETE /project/:name
+// Tests for Route DELETE /projects/:name
 func TestDeleteProject(t *testing.T) {
 	server, store := setupProjectTests()
 
@@ -196,6 +196,62 @@ func TestDeleteProject(t *testing.T) {
 
 		assert.Equal(t, http.StatusNotFound, w.Code, "wanted http.StatusNotFound got %s", w.Code)
 		assert.Len(t, store.Projects, 2)
+	})
+}
+
+// Tests for Route PUT /projects/:name/archive
+func TestArchiveProject(t *testing.T) {
+	server, store := setupProjectTests()
+
+	t.Run("Archive project homework", func(t *testing.T) {
+		// Copy of project homework for asserts
+		updatedHomework := store.Projects[0]
+		updatedHomework.Archived = true
+
+		req, _ := http.NewRequest("PUT", "/projects/homework/archive", nil)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code, "wanted http.StatusOK got %s", w.Code)
+		assert.Len(t, store.Projects, 3)
+		assert.Containsf(t, store.Projects, updatedHomework, "project was not archived")
+	})
+
+	t.Run("Try to archive nonexistent project", func(t *testing.T) {
+		req, _ := http.NewRequest("PUT", "/projects/biology/archive", nil)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusNotFound, w.Code, "wanted http.StatusNotFound got %s", w.Code)
+		assert.Len(t, store.Projects, 3)
+	})
+}
+
+// Tests for Route DELETE /projects/:name/archive
+func TestUnArchiveProject(t *testing.T) {
+	server, store := setupProjectTests()
+
+	t.Run("Unarchive project cleaning", func(t *testing.T) {
+		// Copy of project cleaning for asserts
+		updatedCleaning := store.Projects[1]
+		updatedCleaning.Archived = false
+
+		req, _ := http.NewRequest("DELETE", "/projects/cleaning/archive", nil)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code, "wanted http.StatusOK got %s", w.Code)
+		assert.Len(t, store.Projects, 3)
+		assert.Containsf(t, store.Projects, updatedCleaning, "project was not archived")
+	})
+
+	t.Run("Try to unarchive nonexistent project", func(t *testing.T) {
+		req, _ := http.NewRequest("DELETE", "/projects/biology/archive", nil)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusNotFound, w.Code, "wanted http.StatusNotFound got %s", w.Code)
+		assert.Len(t, store.Projects, 3)
 	})
 }
 

@@ -49,6 +49,7 @@ func (s *StubTodoStore) GetAllProjects() []model.Project {
 func (s *StubTodoStore) UpdateProject(project model.Project) error {
 	index := int(project.ID) - 1
 	s.Projects[index].Name = project.Name
+	s.Projects[index].Archived = project.Archived
 	return nil
 }
 
