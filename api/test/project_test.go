@@ -143,6 +143,31 @@ func TestGetAllProjects(t *testing.T) {
 	assert.JSONEqf(t, want, gotJSON, "wanted %s got %s", want, gotJSON)
 }
 
+// Tests for Route PUT /project/:name
+func TestUpdateProject(t *testing.T) {
+	server, store := setupProjectTests()
+
+	t.Run("rename project homework to mathhomework", func(t *testing.T) {
+		requestBody := makeNewPostProjectBody(t, "mathhomework", true)
+		req, _ := http.NewRequest("PUT", "/projects/homework", requestBody)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code, "wanted http.StatusOK got %s", w.Code)
+		assert.Equalf(t, "mathhomework", store.Projects[0].Name, "project was not updated")
+		assert.Len(t, store.Projects, 3)
+	})
+
+	t.Run("Try to rename a nonexisting project", func(t *testing.T) {
+		requestBody := makeNewPostProjectBody(t, "biologyhomework", true)
+		req, _ := http.NewRequest("PUT", "/projects/biology", requestBody)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusNotFound, w.Code, "wanted http.StatusNotFound got %s", w.Code)
+	})
+}
+
 // makes a new json request body for POST /projects/
 // if valid == false a invalid requestBody is returned
 func makeNewPostProjectBody(t *testing.T, name string, vaild bool) *bytes.Buffer {

@@ -64,3 +64,36 @@ func GetAllProjectsHandler(t store.TodoStore, c *gin.Context) {
 	projects := t.GetAllProjects()
 	c.JSON(http.StatusOK, projects)
 }
+
+// Handler for PUT /projects/:name
+func PutProjectHandler(t store.TodoStore, c *gin.Context) {
+	// validate json requestBody
+	var json Post
+	if err := c.ShouldBindJSON(&json); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	oldProjectName := c.Param("name")
+	newProjectName := json.Name
+
+	// Check if project exists
+	project := t.GetProject(oldProjectName)
+	if project.Name == "" {
+		c.JSON(http.StatusNotFound, gin.H{"message": "project not found"})
+		return
+	}
+
+	// Update Project
+	project.Name = newProjectName
+	err := t.UpdateProject(project)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err,
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "project updated",
+	})
+}
