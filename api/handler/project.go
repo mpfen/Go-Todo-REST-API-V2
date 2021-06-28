@@ -12,21 +12,12 @@ import (
 func GetProjectHandler(t store.TodoStore, c *gin.Context) {
 	projectName := c.Param("name")
 
-	project := t.GetProject(projectName)
-
-	// Check if no project with that name was found
+	project := checkIfProjectExistsOr404(t, c, projectName)
 	if project.Name == "" {
-		c.JSON(http.StatusNotFound, gin.H{
-			"message": "project not found",
-		})
 		return
 	}
-	c.JSON(http.StatusOK, project)
-}
 
-// For json validation of POST /projects/
-type Post struct {
-	Name string `json:"name" binding:"required"`
+	c.JSON(http.StatusOK, project)
 }
 
 // Handler for POST /projects/
@@ -34,7 +25,7 @@ func PostProjectHandler(t store.TodoStore, c *gin.Context) {
 	// validate json requestBody
 	var json Post
 	if err := c.ShouldBindJSON(&json); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		sendJSONResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -43,16 +34,14 @@ func PostProjectHandler(t store.TodoStore, c *gin.Context) {
 	// Check if project already exists
 	project := t.GetProject(projectName)
 	if project.Name != "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "project already existing"})
+		sendJSONResponse(c, http.StatusBadRequest, "project already existing")
 		return
 	}
 
 	// Create project
 	err := t.PostProject(projectName)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err,
-		})
+		sendJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{
@@ -71,7 +60,7 @@ func PutProjectHandler(t store.TodoStore, c *gin.Context) {
 	// validate json requestBody
 	var json Post
 	if err := c.ShouldBindJSON(&json); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		sendJSONResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -79,19 +68,13 @@ func PutProjectHandler(t store.TodoStore, c *gin.Context) {
 	newProjectName := json.Name
 
 	// Check if project exists
-	project := t.GetProject(oldProjectName)
-	if project.Name == "" {
-		c.JSON(http.StatusNotFound, gin.H{"message": "project not found"})
-		return
-	}
+	project := checkIfProjectExistsOr404(t, c, oldProjectName)
 
 	// Update Project
 	project.Name = newProjectName
 	err := t.UpdateProject(project)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err,
-		})
+		sendJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
@@ -101,18 +84,17 @@ func PutProjectHandler(t store.TodoStore, c *gin.Context) {
 
 // Handler for DELETE /projects/:name
 func DeleteProjectHandler(t store.TodoStore, c *gin.Context) {
+	// Try to delete project
 	projectName := c.Param("name")
 	err := t.DeleteProject(projectName)
 
 	// Check error if no project was found
 	if err == gorm.ErrRecordNotFound {
-		c.JSON(http.StatusNotFound, gin.H{
-			"message": "project not found",
-		})
+		sendJSONResponse(c, http.StatusNotFound, "project not found")
+		return
 	} else if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err,
-		})
+		sendJSONResponse(c, http.StatusInternalServerError, err.Error())
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": "project deleted",
@@ -124,9 +106,8 @@ func ArchiveProjectHandler(t store.TodoStore, c *gin.Context) {
 	projectName := c.Param("name")
 
 	// Check if project exists
-	project := t.GetProject(projectName)
+	project := checkIfProjectExistsOr404(t, c, projectName)
 	if project.Name == "" {
-		c.JSON(http.StatusNotFound, gin.H{"message": "project not found"})
 		return
 	}
 
@@ -145,9 +126,7 @@ func ArchiveProjectHandler(t store.TodoStore, c *gin.Context) {
 	err := t.UpdateProject(project)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err,
-		})
+		sendJSONResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
