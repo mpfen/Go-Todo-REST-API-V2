@@ -8,9 +8,16 @@ import (
 	"github.com/mpfen/Go-Todo-REST-API-V2/api/store"
 )
 
-// For json validation of POST /projects/
+// For json validation of POST /projects/:name
 type Post struct {
 	Name string `json:"name" binding:"required"`
+}
+
+// For json validation of POST /projects/:name/tasks
+type Task struct {
+	Name     string `json:"name" binding:"required"`
+	Priority string `json:"priority" binding:"required"`
+	Deadline string `json:"deadline" binding:"required"`
 }
 
 // Checks if a project with that name exist.

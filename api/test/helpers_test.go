@@ -48,8 +48,11 @@ func (s *StubTodoStore) GetAllProjects() []model.Project {
 
 func (s *StubTodoStore) UpdateProject(project model.Project) error {
 	index := int(project.ID) - 1
-	s.Projects[index].Name = project.Name
-	s.Projects[index].Archived = project.Archived
+	if index >= 0 {
+		s.Projects[index].Name = project.Name
+		s.Projects[index].Archived = project.Archived
+	}
+
 	return nil
 }
 
@@ -61,6 +64,28 @@ func (s *StubTodoStore) DeleteProject(projectName string) error {
 		}
 	}
 	return gorm.ErrRecordNotFound
+}
+
+func (s *StubTodoStore) PostTask(task model.Task) error {
+	time := time.Time{}
+	deletedAT := gorm.DeletedAt{}
+
+	newTask := model.Task{
+		Model: gorm.Model{
+			ID:        uint(42),
+			CreatedAt: time,
+			UpdatedAt: time,
+			DeletedAt: deletedAT,
+		},
+		Name:      task.Name,
+		Priority:  task.Priority,
+		Deadline:  &time,
+		Done:      false,
+		ProjectID: task.ProjectID,
+	}
+
+	s.Tasks = append(s.Tasks, newTask)
+	return nil
 }
 
 // Converts a project struct to json

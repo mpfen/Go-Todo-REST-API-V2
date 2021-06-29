@@ -26,6 +26,9 @@ func NewTodoServer(store store.TodoStore) *TodoServer {
 	t.Router.DELETE("/projects/:name/archive", t.ArchiveProject)
 	t.Router.PUT("/projects/:name/archive", t.ArchiveProject)
 
+	// Task routes
+	t.Router.POST("projects/:name/tasks", t.PostTask)
+
 	return t
 }
 
@@ -52,4 +55,9 @@ func (t *TodoServer) DeleteProject(c *gin.Context) {
 
 func (t *TodoServer) ArchiveProject(c *gin.Context) {
 	handler.ArchiveProjectHandler(t.Store, c)
+}
+
+// Task Handlers
+func (t *TodoServer) PostTask(c *gin.Context) {
+	handler.PostTaskHandler(t.Store, c)
 }
