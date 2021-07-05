@@ -8,9 +8,9 @@ import (
 	"gorm.io/gorm"
 )
 
-// Handler for GET /projects/:name
+// Handler for GET /projects/:projectName
 func GetProjectHandler(t store.TodoStore, c *gin.Context) {
-	projectName := c.Param("name")
+	projectName := c.Param("projectName")
 
 	project := checkIfProjectExistsOr404(t, c, projectName)
 	if project.Name == "" {
@@ -55,7 +55,7 @@ func GetAllProjectsHandler(t store.TodoStore, c *gin.Context) {
 	c.JSON(http.StatusOK, projects)
 }
 
-// Handler for PUT /projects/:name
+// Handler for PUT /projects/:projectName
 func PutProjectHandler(t store.TodoStore, c *gin.Context) {
 	// validate json requestBody
 	var json Post
@@ -64,7 +64,7 @@ func PutProjectHandler(t store.TodoStore, c *gin.Context) {
 		return
 	}
 
-	oldProjectName := c.Param("name")
+	oldProjectName := c.Param("projectName")
 	newProjectName := json.Name
 
 	// Check if project exists
@@ -82,10 +82,10 @@ func PutProjectHandler(t store.TodoStore, c *gin.Context) {
 	})
 }
 
-// Handler for DELETE /projects/:name
+// Handler for DELETE /projects/:projectName
 func DeleteProjectHandler(t store.TodoStore, c *gin.Context) {
 	// Try to delete project
-	projectName := c.Param("name")
+	projectName := c.Param("projectName")
 	err := t.DeleteProject(projectName)
 
 	// Check error if no project was found
@@ -101,9 +101,9 @@ func DeleteProjectHandler(t store.TodoStore, c *gin.Context) {
 	})
 }
 
-// Handler for PUT/DELETE /projects/:name/archive
+// Handler for PUT/DELETE /projects/:projectName/archive
 func ArchiveProjectHandler(t store.TodoStore, c *gin.Context) {
-	projectName := c.Param("name")
+	projectName := c.Param("projectName")
 
 	// Check if project exists
 	project := checkIfProjectExistsOr404(t, c, projectName)

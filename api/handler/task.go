@@ -9,7 +9,7 @@ import (
 	"github.com/mpfen/Go-Todo-REST-API-V2/api/store"
 )
 
-// Handler for POST /projects/:name/tasks
+// Handler for POST /projects/:projectName/tasks
 func PostTaskHandler(t store.TodoStore, c *gin.Context) {
 	// validate json requestBody
 	var json Task
@@ -18,7 +18,7 @@ func PostTaskHandler(t store.TodoStore, c *gin.Context) {
 		return
 	}
 
-	projectName := c.Param("name")
+	projectName := c.Param("projectName")
 
 	// Check if project exists
 	project := checkIfProjectExistsOr404(t, c, projectName)
@@ -52,7 +52,7 @@ func PostTaskHandler(t store.TodoStore, c *gin.Context) {
 
 // Handler for Route GET /projects/:projectName/tasks/:taskName
 func GetTaskHandler(t store.TodoStore, c *gin.Context) {
-	projectName := c.Param("name")
+	projectName := c.Param("projectName")
 	taskName := c.Param("taskName")
 
 	// Check if project exists

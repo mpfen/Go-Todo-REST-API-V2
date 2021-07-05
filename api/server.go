@@ -18,17 +18,17 @@ func NewTodoServer(store store.TodoStore) *TodoServer {
 	t.Router = gin.Default()
 
 	// Project routes
-	t.Router.GET("/projects/:name", t.GetProject)
+	t.Router.GET("/projects/:projectName", t.GetProject)
 	t.Router.POST("/projects/", t.PostProject)
 	t.Router.GET("/projects/", t.GetAllProjects)
-	t.Router.PUT("/projects/:name", t.PutProject)
-	t.Router.DELETE("/projects/:name", t.DeleteProject)
-	t.Router.DELETE("/projects/:name/archive", t.ArchiveProject)
-	t.Router.PUT("/projects/:name/archive", t.ArchiveProject)
+	t.Router.PUT("/projects/:projectName", t.PutProject)
+	t.Router.DELETE("/projects/:projectName", t.DeleteProject)
+	t.Router.DELETE("/projects/:projectName/archive", t.ArchiveProject)
+	t.Router.PUT("/projects/:projectName/archive", t.ArchiveProject)
 
 	// Task routes
-	t.Router.POST("projects/:name/tasks", t.PostTask)
-	t.Router.GET("projects/:name/tasks/:taskName", t.GetTask)
+	t.Router.POST("projects/:projectName/tasks", t.PostTask)
+	t.Router.GET("projects/:projectName/tasks/:taskName", t.GetTask)
 
 	return t
 }
