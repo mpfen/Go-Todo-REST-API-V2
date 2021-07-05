@@ -19,7 +19,7 @@ type TodoStore interface {
 	DeleteProject(name string) error
 	UpdateProject(project model.Project) error
 
-	//GetTask(projectName, taskName string) model.Task
+	GetTask(projectName, taskName string) model.Task
 	PostTask(task model.Task) error
 	//GetAllProjectTasks(project model.Project) []model.Task
 	//DeleteTask(task model.Task) error

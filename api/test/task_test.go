@@ -129,6 +129,46 @@ func TestPostTask(t *testing.T) {
 	})
 }
 
+// Tests for Route GET /projects/:projectName/tasks/:taskname
+func TestGetTask(t *testing.T) {
+	server, store := setupTaskTests()
+
+	t.Run("Get Task 'math' from project 'homework'", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/projects/homework/tasks/math", nil)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equalf(t, http.StatusOK, w.Code, "wanted http.StatusOK got %s", w.Code)
+		want := taskToJSON(t, store.Tasks[0])
+		assert.JSONEqf(t, want, w.Body.String(), "wanted %s, got %s", want, w.Body.String())
+	})
+
+	t.Run("Try to get task from nonexisting project", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/projects/homwork/tasks/math", nil)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equalf(t, http.StatusNotFound, w.Code, "wanted http.StatusNotFound got %s", w.Code)
+
+		// Check for correct message
+		want := `{"message": "project not found"}`
+		assert.JSONEqf(t, want, w.Body.String(), "wanted %s, got %s", want, w.Body.String())
+	})
+
+	t.Run("Try to get nonexistent task from project", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/projects/homework/tasks/math2", nil)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equalf(t, http.StatusNotFound, w.Code, "wanted http.StatusNotFound got %s", w.Code)
+
+		// Check for correct message
+		want := `{"message": "task not found"}`
+		assert.JSONEqf(t, want, w.Body.String(), "wanted %s, got %s", want, w.Body.String())
+	})
+
+}
+
 // makes a new json request body for POST /projects/:name/tasks
 // if !valid a invalid requestBody is returned
 func makeNewPostTaskBody(t *testing.T, name string, vaild bool) *bytes.Buffer {

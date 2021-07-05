@@ -28,6 +28,7 @@ func NewTodoServer(store store.TodoStore) *TodoServer {
 
 	// Task routes
 	t.Router.POST("projects/:name/tasks", t.PostTask)
+	t.Router.GET("projects/:name/tasks/:taskName", t.GetTask)
 
 	return t
 }
@@ -60,4 +61,8 @@ func (t *TodoServer) ArchiveProject(c *gin.Context) {
 // Task Handlers
 func (t *TodoServer) PostTask(c *gin.Context) {
 	handler.PostTaskHandler(t.Store, c)
+}
+
+func (t *TodoServer) GetTask(c *gin.Context) {
+	handler.GetTaskHandler(t.Store, c)
 }

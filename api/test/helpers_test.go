@@ -88,12 +88,37 @@ func (s *StubTodoStore) PostTask(task model.Task) error {
 	return nil
 }
 
+func (s *StubTodoStore) GetTask(projectName, taskName string) model.Task {
+	var projectID uint
+	for _, project := range s.Projects {
+		if project.Name == projectName {
+			projectID = project.ID
+		}
+	}
+	for i, task := range s.Tasks {
+		if task.Name == taskName && task.ProjectID == projectID {
+			return s.Tasks[i]
+		}
+	}
+	return model.Task{}
+}
+
 // Converts a project struct to json
 func projectToJson(t *testing.T, project model.Project) string {
 	t.Helper()
 	want, err := json.Marshal(project)
 	if err != nil {
 		t.Errorf("Error parsing project to json: %s", err)
+	}
+	return string(want[:])
+}
+
+// Converts a task struct to json
+func taskToJSON(t *testing.T, task model.Task) string {
+	t.Helper()
+	want, err := json.Marshal(task)
+	if err != nil {
+		t.Errorf("Error parsing task to json: %s", err)
 	}
 	return string(want[:])
 }

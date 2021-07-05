@@ -25,13 +25,27 @@ type Task struct {
 func checkIfProjectExistsOr404(t store.TodoStore, c *gin.Context, projectName string) model.Project {
 	project := t.GetProject(projectName)
 
-	// Check if no project with that name was found
+	// If not project was found the struct is "empty"
 	if project.Name == "" {
 		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
 			"message": "project not found",
 		})
 	}
 	return project
+}
+
+// Checks if a task with that name exist in the project
+// If no task in that project is found the context is aborted and a response is send
+func checkIfTaskExistsOr404(t store.TodoStore, c *gin.Context, projectName, taskName string) model.Task {
+	task := t.GetTask(projectName, taskName)
+
+	// If no task was found the struct is "empty"
+	if task.Name == "" {
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+			"message": "task not found",
+		})
+	}
+	return task
 }
 
 // Send a JSON response and ends the context

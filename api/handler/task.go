@@ -30,9 +30,9 @@ func PostTaskHandler(t store.TodoStore, c *gin.Context) {
 	task := model.Task{}
 	task.Name = json.Name
 	task.Priority = json.Priority
-	deadline, errTime := time.Parse("2006-01-02 15:04:05 +0000 UTC", json.Deadline)
 
-	// Parse the deadline string as a time.Time
+	// Parse the deadline string as a time.Time{}
+	deadline, errTime := time.Parse("2006-01-02 15:04:05 +0000 UTC", json.Deadline)
 	if errTime != nil {
 		sendJSONResponse(c, http.StatusBadRequest, errTime.Error())
 		return
@@ -48,4 +48,23 @@ func PostTaskHandler(t store.TodoStore, c *gin.Context) {
 		return
 	}
 	sendJSONResponse(c, http.StatusCreated, "task created")
+}
+
+// Handler for Route GET /projects/:projectName/tasks/:taskName
+func GetTaskHandler(t store.TodoStore, c *gin.Context) {
+	projectName := c.Param("name")
+	taskName := c.Param("taskName")
+
+	// Check if project exists
+	project := checkIfProjectExistsOr404(t, c, projectName)
+	if project.Name == "" {
+		return
+	}
+
+	// Check if task exists
+	task := checkIfTaskExistsOr404(t, c, projectName, taskName)
+	if task.Name == "" {
+		return
+	}
+	c.JSON(http.StatusOK, task)
 }
