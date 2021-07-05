@@ -93,7 +93,7 @@ func setupTaskTests() (server *api.TodoServer, store *StubTodoStore) {
 	return server, store
 }
 
-// Test for Route POST /projects/:name/tasks
+// Test for Route POST /projects/:projectName/tasks
 func TestPostTask(t *testing.T) {
 	server, store := setupTaskTests()
 
@@ -169,7 +169,33 @@ func TestGetTask(t *testing.T) {
 
 }
 
-// makes a new json request body for POST /projects/:name/tasks
+// Test for Route GET /projects/:projectName/tasks
+func TestGetAllTasks(t *testing.T) {
+	server, store := setupTaskTests()
+
+	t.Run("Get all task from project ’homework’", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/projects/homework/tasks", nil)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equalf(t, http.StatusOK, w.Code, "wanted http.StatusOK got %s", w.Code)
+
+		homeworkTasks := append([]model.Task{}, store.Tasks[0], store.Tasks[2])
+		want := tasksToJson(t, homeworkTasks)
+		assert.JSONEqf(t, want, w.Body.String(), "wanted %s, got %s", want, w.Body.String())
+	})
+
+	t.Run("Get all Tasks from a project without tasks", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/projects/school/tasks", nil)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equalf(t, http.StatusOK, w.Code, "wanted http.StatusOK got %s", w.Code)
+		assert.Equalf(t, "[]", w.Body.String(), "wanted empty response, got %s", w.Body.String())
+	})
+}
+
+// makes a new json request body for POST /projects/:projectName/tasks
 // if !valid a invalid requestBody is returned
 func makeNewPostTaskBody(t *testing.T, name string, vaild bool) *bytes.Buffer {
 	if vaild {

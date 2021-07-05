@@ -103,10 +103,31 @@ func (s *StubTodoStore) GetTask(projectName, taskName string) model.Task {
 	return model.Task{}
 }
 
+func (s *StubTodoStore) GetAllProjectTasks(project model.Project) []model.Task {
+	projects := []model.Task{}
+
+	for _, projectIter := range s.Tasks {
+		if projectIter.ProjectID == project.ID {
+			projects = append(projects, projectIter)
+		}
+	}
+	return projects
+}
+
 // Converts a project struct to json
 func projectToJson(t *testing.T, project model.Project) string {
 	t.Helper()
 	want, err := json.Marshal(project)
+	if err != nil {
+		t.Errorf("Error parsing project to json: %s", err)
+	}
+	return string(want[:])
+}
+
+// Converts an array of projects to json
+func projectsToJson(t *testing.T, projects []model.Project) string {
+	t.Helper()
+	want, err := json.Marshal(projects)
 	if err != nil {
 		t.Errorf("Error parsing project to json: %s", err)
 	}
@@ -123,12 +144,11 @@ func taskToJSON(t *testing.T, task model.Task) string {
 	return string(want[:])
 }
 
-// Converts an array of projects to json
-func projectsToJson(t *testing.T, projects []model.Project) string {
+func tasksToJson(t *testing.T, tasks []model.Task) string {
 	t.Helper()
-	want, err := json.Marshal(projects)
+	want, err := json.Marshal(tasks)
 	if err != nil {
-		t.Errorf("Error parsing project to json: %s", err)
+		t.Errorf("Error parsing task to json: %s", err)
 	}
 	return string(want[:])
 }

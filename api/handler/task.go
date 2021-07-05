@@ -68,3 +68,18 @@ func GetTaskHandler(t store.TodoStore, c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, task)
 }
+
+// Handler for Route GET /projects/:projectName/tasks
+func GetAllTasksHandler(t store.TodoStore, c *gin.Context) {
+	projectName := c.Param("projectName")
+
+	// Check if project exists
+	project := checkIfProjectExistsOr404(t, c, projectName)
+	if project.Name == "" {
+		return
+	}
+
+	// Get all Tasks of the project
+	tasks := t.GetAllProjectTasks(project)
+	c.JSON(http.StatusOK, tasks)
+}
