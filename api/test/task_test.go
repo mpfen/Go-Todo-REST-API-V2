@@ -195,6 +195,39 @@ func TestGetAllTasks(t *testing.T) {
 	})
 }
 
+// Test for Route PUt /projects/:projectName/task/:taskName
+func TestUpdateTask(t *testing.T) {
+	server, store := setupTaskTests()
+
+	t.Run("Update task 'math' from project 'homework' to 'mathexam'", func(t *testing.T) {
+		putRequestBody := makeNewPostTaskBody(t, "mathexam", true)
+		req, _ := http.NewRequest("PUT", "/projects/homework/tasks/math", putRequestBody)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equalf(t, http.StatusOK, w.Code, "wanted http.StatusOK got %s", w.Code)
+		assert.Equalf(t, store.Tasks[0].Name, "mathexam", "wanted 'mathexam', got %s", store.Tasks[0].Name)
+	})
+
+	t.Run("Try to update nonexistent task", func(t *testing.T) {
+		putRequestBody := makeNewPostTaskBody(t, "mathexam", true)
+		req, _ := http.NewRequest("PUT", "/projects/homework/tasks/math2", putRequestBody)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equalf(t, http.StatusNotFound, w.Code, "wanted http.StatusNotFound got %s", w.Code)
+	})
+
+	t.Run("Try to update task of nonexistent project", func(t *testing.T) {
+		putRequestBody := makeNewPostTaskBody(t, "mathexam", true)
+		req, _ := http.NewRequest("PUT", "/projects/homework2/tasks/math", putRequestBody)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equalf(t, http.StatusNotFound, w.Code, "wanted http.StatusNotFound got %s", w.Code)
+	})
+}
+
 // makes a new json request body for POST /projects/:projectName/tasks
 // if !valid a invalid requestBody is returned
 func makeNewPostTaskBody(t *testing.T, name string, vaild bool) *bytes.Buffer {

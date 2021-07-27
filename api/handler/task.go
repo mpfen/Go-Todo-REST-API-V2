@@ -83,3 +83,48 @@ func GetAllTasksHandler(t store.TodoStore, c *gin.Context) {
 	tasks := t.GetAllProjectTasks(project)
 	c.JSON(http.StatusOK, tasks)
 }
+
+// Handler for Route PUT /projects/:projectName/tasks/:taskName
+func PutTaskHandler(t store.TodoStore, c *gin.Context) {
+	// validate json requestBody
+	var jsonTask Task
+	if err := c.ShouldBindJSON(&jsonTask); err != nil {
+		sendJSONResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	projectName := c.Param("projectName")
+
+	// Check if project exists
+	project := checkIfProjectExistsOr404(t, c, projectName)
+	if project.Name == "" {
+		return
+	}
+
+	// Check if task exists
+	oldTaskName := c.Param("taskName")
+	oldTask := checkIfTaskExistsOr404(t, c, projectName, oldTaskName)
+	if oldTask.Name == "" {
+		return
+	}
+
+	// Update task
+	oldTask.Name = jsonTask.Name
+	oldTask.Priority = jsonTask.Priority
+	// Parse the deadline string as a time.Time{}
+	deadline, errTime := time.Parse("2006-01-02 15:04:05 +0000 UTC", jsonTask.Deadline)
+	if errTime != nil {
+		sendJSONResponse(c, http.StatusBadRequest, errTime.Error())
+		return
+	}
+	oldTask.Deadline = &deadline
+
+	err := t.UpdateTask(oldTask)
+
+	if err != nil {
+		sendJSONResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	sendJSONResponse(c, http.StatusOK, "task updated")
+}

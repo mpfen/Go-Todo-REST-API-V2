@@ -114,6 +114,17 @@ func (s *StubTodoStore) GetAllProjectTasks(project model.Project) []model.Task {
 	return projects
 }
 
+func (s *StubTodoStore) UpdateTask(task model.Task) error {
+	index := int(task.ID) - 1
+
+	if index >= 0 {
+		s.Tasks[index].Name = task.Name
+		s.Tasks[index].Deadline = task.Deadline
+		s.Tasks[index].Priority = task.Priority
+	}
+	return nil
+}
+
 // Converts a project struct to json
 func projectToJson(t *testing.T, project model.Project) string {
 	t.Helper()
