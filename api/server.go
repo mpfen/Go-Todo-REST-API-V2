@@ -31,6 +31,7 @@ func NewTodoServer(store store.TodoStore) *TodoServer {
 	t.Router.GET("projects/:projectName/tasks/:taskName", t.GetTask)
 	t.Router.GET("projects/:projectName/tasks", t.GetAllTasks)
 	t.Router.PUT("projects/:projectName/tasks/:taskName", t.PutTask)
+	t.Router.DELETE("projects/:projectName/tasks/:taskName", t.DeleteTask)
 
 	return t
 }
@@ -75,4 +76,8 @@ func (t *TodoServer) GetAllTasks(c *gin.Context) {
 
 func (t *TodoServer) PutTask(c *gin.Context) {
 	handler.PutTaskHandler(t.Store, c)
+}
+
+func (t *TodoServer) DeleteTask(c *gin.Context) {
+	handler.DeleteTaskHandler(t.Store, c)
 }

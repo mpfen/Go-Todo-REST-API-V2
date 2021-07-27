@@ -128,3 +128,22 @@ func PutTaskHandler(t store.TodoStore, c *gin.Context) {
 
 	sendJSONResponse(c, http.StatusOK, "task updated")
 }
+
+// Handler for Route DELETE /projects/:projectName/tasks/:taskName
+func DeleteTaskHandler(t store.TodoStore, c *gin.Context) {
+	projectName := c.Param("projectName")
+	taskName := c.Param("taskName")
+
+	// Check if task exists
+	task := checkIfTaskExistsOr404(t, c, projectName, taskName)
+	if task.Name == "" {
+		return
+	}
+
+	err := t.DeleteTask(task)
+	if err != nil {
+		sendJSONResponse(c, http.StatusInternalServerError, err.Error())
+	}
+
+	sendJSONResponse(c, http.StatusOK, "task deleted")
+}

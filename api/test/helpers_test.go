@@ -125,6 +125,13 @@ func (s *StubTodoStore) UpdateTask(task model.Task) error {
 	return nil
 }
 
+func (s *StubTodoStore) DeleteTask(task model.Task) error {
+	index := int(task.ID) - 1
+	s.Tasks = append(s.Tasks[:index], s.Tasks[(index+1):]...)
+
+	return nil
+}
+
 // Converts a project struct to json
 func projectToJson(t *testing.T, project model.Project) string {
 	t.Helper()

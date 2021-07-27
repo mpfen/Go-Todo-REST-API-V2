@@ -228,6 +228,31 @@ func TestUpdateTask(t *testing.T) {
 	})
 }
 
+// Tests for Route DELETE /projects/:projectName/tasks/:taskName
+func TestDeleteTask(t *testing.T) {
+	server, store := setupTaskTests()
+
+	t.Run("Delete task 'math' from project 'homework'", func(t *testing.T) {
+		mathTask := store.Tasks[0]
+
+		req, _ := http.NewRequest("DELETE", "/projects/homework/tasks/math", nil)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equalf(t, http.StatusOK, w.Code, "wanted http.StatusOK, got %s", w.Code)
+		assert.NotContains(t, store.Tasks, mathTask, "Task was not deleted")
+	})
+
+	t.Run("Try to delete nonexistent task", func(t *testing.T) {
+		req, _ := http.NewRequest("DELETE", "/projects/homework/tasks/math2", nil)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equalf(t, http.StatusNotFound, w.Code, "wanted http.StatusNotFound, got %s", w.Code)
+		assert.Lenf(t, store.Tasks, 2, "No task should have been deleted")
+	})
+}
+
 // makes a new json request body for POST /projects/:projectName/tasks
 // if !valid a invalid requestBody is returned
 func makeNewPostTaskBody(t *testing.T, name string, vaild bool) *bytes.Buffer {
