@@ -121,6 +121,7 @@ func (s *StubTodoStore) UpdateTask(task model.Task) error {
 		s.Tasks[index].Name = task.Name
 		s.Tasks[index].Deadline = task.Deadline
 		s.Tasks[index].Priority = task.Priority
+		s.Tasks[index].Done = task.Done
 	}
 	return nil
 }

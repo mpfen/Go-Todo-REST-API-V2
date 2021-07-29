@@ -253,8 +253,48 @@ func TestDeleteTask(t *testing.T) {
 	})
 }
 
+// Tests for Route PUT/DELETE /projects/:projectName/tasks/:taskName/complete
+// Task completion and undoing
+func TestCompleteAndUndoTask(t *testing.T) {
+	server, store := setupTaskTests()
+
+	t.Run("Complete task 'math' from project 'homework'", func(t *testing.T) {
+		req, _ := http.NewRequest("PUT", "/projects/homework/tasks/math/complete", nil)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equalf(t, http.StatusOK, w.Code, "wanted http.StatusOK, got %s", w.Code)
+		assert.Equal(t, true, store.Tasks[0].Done, "task was not completed")
+	})
+
+	t.Run("Try to complete nonexistent task", func(t *testing.T) {
+		req, _ := http.NewRequest("PUT", "/projects/homework2/tasks/math2/complete", nil)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equalf(t, http.StatusNotFound, w.Code, "wanted http.StatusNotFound, got %s", w.Code)
+	})
+
+	t.Run("Undo task 'math' from project 'homework'", func(t *testing.T) {
+		req, _ := http.NewRequest("DELETE", "/projects/homework/tasks/math/complete", nil)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equalf(t, http.StatusOK, w.Code, "wanted http.StatusOK, got %s", w.Code)
+		assert.Equal(t, false, store.Tasks[0].Done, "task was not undone")
+	})
+
+	t.Run("Try to undo nonexistent task", func(t *testing.T) {
+		req, _ := http.NewRequest("DELETE", "/projects/homework2/tasks/math2/complete", nil)
+		w := httptest.NewRecorder()
+		server.Router.ServeHTTP(w, req)
+
+		assert.Equalf(t, http.StatusNotFound, w.Code, "wanted http.StatusNotFound, got %s", w.Code)
+	})
+}
+
 // makes a new json request body for POST /projects/:projectName/tasks
-// if !valid a invalid requestBody is returned
+// if !valid an invalid requestBody is returned
 func makeNewPostTaskBody(t *testing.T, name string, vaild bool) *bytes.Buffer {
 	if vaild {
 		requestBody, err := json.Marshal(map[string]string{

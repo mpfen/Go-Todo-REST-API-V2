@@ -147,3 +147,37 @@ func DeleteTaskHandler(t store.TodoStore, c *gin.Context) {
 
 	sendJSONResponse(c, http.StatusOK, "task deleted")
 }
+
+// Handler for Route PUT/DELETE /projects/:projectName/tasks/:taskname
+func CompleteTaskHandler(t store.TodoStore, c *gin.Context) {
+	projectName := c.Param("projectName")
+	taskName := c.Param("taskName")
+
+	// Check if task exists
+	task := checkIfTaskExistsOr404(t, c, projectName, taskName)
+	if task.Name == "" {
+		return
+	}
+
+	// Update task struct
+	var message string
+	switch httpMethod := c.Request.Method; httpMethod {
+	case "PUT":
+		task.CompleteTask()
+		message = "task completed"
+	case "DELETE":
+		task.ReopenTask()
+		message = "task undone"
+	default:
+		sendJSONResponse(c, http.StatusInternalServerError, "wrong http method")
+	}
+
+	// update task in db
+	err := t.UpdateTask(task)
+	if err != nil {
+		sendJSONResponse(c, http.StatusInternalServerError, err.Error())
+	}
+
+	sendJSONResponse(c, http.StatusOK, message)
+
+}
